@@ -24,6 +24,7 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 - P5.1 research note:
   - `docs/SECRET_BALLOT_RESEARCH.md`
 - P5.2 explicit secret-ballot **NO-GO** decision recorded in `docs/SCOPE.md`
+- `docs/LAUNCH_KIT.md` with copy-ready awareness posts, pitch text, and rollout checklist
 
 ### Changed
 

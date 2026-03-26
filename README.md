@@ -18,6 +18,8 @@ Lightweight voting hApp: elections, voter registration, ballots, and tallies on 
 
 **Secret ballot / P5:** [docs/SECRET_BALLOT_RESEARCH.md](docs/SECRET_BALLOT_RESEARCH.md) (P5.1 research). **Go/no-go (P5.2):** [docs/SCOPE.md](docs/SCOPE.md#secret-ballot--high-stakes-track--go-no-go-p52) — current decision **NO-GO** for secret-ballot DNA in this repo until criteria there are met.
 
+**Share / awareness:** [docs/LAUNCH_KIT.md](docs/LAUNCH_KIT.md) (copy-paste posts, 30-second pitch, first-week checklist).
+
 ## Prerequisites
 
 - **Docker** (recommended on Windows), or local **Nix** + `nix develop` with Holonix.
