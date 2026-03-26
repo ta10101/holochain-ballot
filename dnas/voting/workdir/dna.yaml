@@ -1,0 +1,16 @@
+manifest_version: '0'
+name: voting
+integrity:
+  network_seed: null
+  properties: {}
+  zomes:
+    - name: voting_integrity
+      hash: null
+      path: ../../../target/wasm32-unknown-unknown/release/voting_integrity.wasm
+coordinator:
+  zomes:
+    - name: voting
+      hash: null
+      path: ../../../target/wasm32-unknown-unknown/release/voting.wasm
+      dependencies:
+        - name: voting_integrity

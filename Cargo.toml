@@ -1,0 +1,6 @@
+[workspace]
+resolver = "2"
+members = [
+  "dnas/voting/zomes/integrity/voting_integrity",
+  "dnas/voting/zomes/coordinator/voting",
+]

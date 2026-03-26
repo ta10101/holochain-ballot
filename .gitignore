@@ -1,0 +1,21 @@
+/target
+**/target/
+node_modules
+showcase/node_modules
+showcase/dist
+.direnv
+*.happ
+*.dna
+!**/workdir/.gitkeep
+
+# Debug session logs
+debug-*.log
+
+# Local secrets / credentials (never commit)
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json

@@ -1,0 +1,119 @@
+name: holochain-ballot
+
+# From repo root:
+#   docker compose -f docker/docker-compose.yml run --rm build-wasm
+#   docker compose -f docker/docker-compose.yml run --rm pack-happ
+# Or: npm run docker:build:happ
+# Tests (after .happ exists): npm run docker:test
+
+services:
+  build-wasm:
+    image: nixos/nix:latest
+    working_dir: /work
+    volumes:
+      - type: bind
+        source: ..
+        target: /work
+      - type: bind
+        source: ./nix.conf
+        target: /etc/nix/nix.conf
+        read_only: true
+    command:
+      - sh
+      - -ec
+      - |
+        set -eu
+        nix develop --accept-flake-config --command bash -lc 'cargo build --release -p voting_integrity -p voting --target wasm32-unknown-unknown'
+
+  pack-happ:
+    image: nixos/nix:latest
+    working_dir: /work
+    environment:
+      HOLONIX_REF: ${HOLONIX_REF:-main-0.6}
+    volumes:
+      - type: bind
+        source: ..
+        target: /work
+      - type: bind
+        source: ./nix.conf
+        target: /etc/nix/nix.conf
+        read_only: true
+    command:
+      - sh
+      - -ec
+      - |
+        set -eu
+        REF="$${HOLONIX_REF:-main-0.6}"
+        cd /work/dnas/voting/workdir
+        nix run "github:holochain/holonix?ref=$${REF}#hc" -- dna pack .
+        cd /work/workdir
+        nix run "github:holochain/holonix?ref=$${REF}#hc" -- app pack .
+        ls -la /work/dnas/voting/workdir/voting.dna /work/workdir/holochain-ballot.happ
+
+  tryorama:
+    image: nixos/nix:latest
+    working_dir: /work
+    volumes:
+      - type: bind
+        source: ..
+        target: /work
+      - type: bind
+        source: ./nix.conf
+        target: /etc/nix/nix.conf
+        read_only: true
+    command:
+      - sh
+      - -ec
+      - |
+        set -eu
+        test -f /work/workdir/holochain-ballot.happ || { echo "Missing workdir/holochain-ballot.happ — run npm run docker:build:happ first"; exit 1; }
+        nix develop --accept-flake-config --command bash -lc 'npm ci && npm run test:only'
+
+  # Same toolchain as tryorama, but runs scripts/visible-voting-demo.mjs (readable play-by-play).
+  demo-visible:
+    image: nixos/nix:latest
+    working_dir: /work
+    environment:
+      DEMO_STEP_MS: ${DEMO_STEP_MS:-1000}
+    volumes:
+      - type: bind
+        source: ..
+        target: /work
+      - type: bind
+        source: ./nix.conf
+        target: /etc/nix/nix.conf
+        read_only: true
+    command:
+      - sh
+      - -ec
+      - |
+        set -eu
+        test -f /work/workdir/holochain-ballot.happ || { echo "Missing workdir/holochain-ballot.happ — run npm run docker:build:happ first"; exit 1; }
+        nix develop --accept-flake-config --command bash -lc 'npm ci && node scripts/visible-voting-demo.mjs'
+
+  # Browser dashboard: http://localhost:3456/ — SSE timeline while Tryorama runs.
+  # Run: npm run demo:dashboard   (keep terminal open; Ctrl+C to stop)
+  demo-dashboard:
+    image: nixos/nix:latest
+    working_dir: /work
+    ports:
+      - "3456:3456"
+    environment:
+      # Auto timeline: no extra delays (IRL). Set DEMO_AUTO_STEP_MS to add pause ms between steps.
+      DEMO_AUTO_STEP_MS: ${DEMO_AUTO_STEP_MS:-0}
+      DEMO_DASHBOARD_PORT: "3456"
+    volumes:
+      - type: bind
+        source: ..
+        target: /work
+      - type: bind
+        source: ./nix.conf
+        target: /etc/nix/nix.conf
+        read_only: true
+    command:
+      - sh
+      - -ec
+      - |
+        set -eu
+        test -f /work/workdir/holochain-ballot.happ || { echo "Missing workdir/holochain-ballot.happ — run npm run docker:build:happ first"; exit 1; }
+        nix develop --accept-flake-config --command bash -lc 'npm ci && node scripts/dashboard-demo.mjs'

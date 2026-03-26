@@ -1,0 +1,32 @@
+{
+  "name": "holochain-ballot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Lightweight voting hApp — elections, registration, ballots, tallies on Holochain.",
+  "scripts": {
+    "build:zomes": "cargo build --release -p voting_integrity -p voting --target wasm32-unknown-unknown",
+    "pack:dna": "cd dnas/voting/workdir && hc dna pack .",
+    "pack:app": "cd workdir && hc app pack .",
+    "build:happ": "npm run build:zomes && npm run pack:dna && npm run pack:app",
+    "docker:build:wasm": "docker compose -f docker/docker-compose.yml run --rm build-wasm",
+    "docker:pack:happ": "docker compose -f docker/docker-compose.yml run --rm pack-happ",
+    "docker:build:happ": "npm run docker:build:wasm && npm run docker:pack:happ",
+    "test": "npm run build:happ && vitest run",
+    "test:only": "vitest run",
+    "docker:test": "docker compose -f docker/docker-compose.yml run --rm tryorama",
+    "demo:visible": "docker compose -f docker/docker-compose.yml run --rm demo-visible",
+    "demo:dashboard": "docker compose -f docker/docker-compose.yml run --rm --service-ports demo-dashboard",
+    "demo:dashboard:fresh": "node scripts/fresh-dashboard.mjs",
+    "demo:dashboard:local": "node scripts/dashboard-demo.mjs",
+    "client:minimal": "node scripts/minimal-client.mjs",
+    "showcase:install": "npm ci --prefix showcase",
+    "showcase:dev": "npm run dev --prefix showcase",
+    "showcase:build": "npm run build --prefix showcase"
+  },
+  "devDependencies": {
+    "@holochain/client": "^0.20.0",
+    "@holochain/tryorama": "^0.19.0",
+    "vitest": "^3.0.5"
+  }
+}

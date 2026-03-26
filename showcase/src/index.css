@@ -1,0 +1,56 @@
+:root {
+  /* U.S.-election inspired: navy field, cream type, red + blue accents */
+  --bg: #0a1628;
+  --bg2: #0f1f35;
+  --surface: #132743;
+  --border: #2a4a6e;
+  --text: #f4f1ea;
+  --muted: #9eb0c8;
+  --accent: #c9302c;
+  --accent-dim: #a82622;
+  --blue: #2e6cad;
+  --blue-dim: #1e4d7a;
+  --teal: var(--blue);
+  --teal-dim: var(--blue-dim);
+  --danger: #e85d5d;
+  --ok: #4a9d6f;
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse 100% 90% at 50% -15%, #1a3050 0%, var(--bg) 55%),
+    linear-gradient(180deg, rgba(201, 48, 44, 0.06) 0%, transparent 35%);
+}
+
+code,
+.mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.85em;
+}
+
+a {
+  color: #7eb8ff;
+}
+
+a:hover {
+  color: #a8d0ff;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

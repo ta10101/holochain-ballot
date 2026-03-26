@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>holochain-ballot — live DNA demo</title>
+    <style>
+      :root {
+        --bg: #0f1419;
+        --panel: #1a2332;
+        --text: #e7ecf3;
+        --muted: #8b9cb3;
+        --accent: #4da3ff;
+        --ok: #3ecf8e;
+        --warn: #f0c14b;
+        --bad: #ff6b6b;
+        --border: #2d3a4d;
+        --terminal-bg: #0a0e14;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.5;
+      }
+      header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+      }
+      header h1 {
+        margin: 0 0 0.35rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        max-width: 56rem;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr min(22rem, 34vw);
+        gap: 0;
+        min-height: calc(100vh - 8rem);
+      }
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .terminal-col {
+          border-left: none;
+          border-top: 1px solid var(--border);
+          max-height: 40vh;
+        }
+      }
+      .timeline-col {
+        padding: 1.25rem 1.5rem 3rem;
+        max-width: 56rem;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .terminal-col {
+        border-left: 1px solid var(--border);
+        background: var(--terminal-bg);
+        display: flex;
+        flex-direction: column;
+        min-height: 280px;
+      }
+      .terminal-head {
+        padding: 0.65rem 1rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.25);
+      }
+      #terminalOut {
+        flex: 1;
+        margin: 0;
+        padding: 0.75rem 1rem 1.25rem;
+        overflow: auto;
+        font-family: "Cascadia Code", "Consolas", ui-monospace, monospace;
+        font-size: 0.72rem;
+        line-height: 1.45;
+        color: #9ece6a;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      #terminalOut .dim {
+        color: #565f89;
+      }
+      .control-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 1rem 1.25rem;
+        margin-bottom: 1.1rem;
+      }
+      .demo-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        flex-shrink: 0;
+      }
+      .demo-actions button {
+        min-width: 10.5rem;
+      }
+      #btnNext {
+        position: relative;
+        z-index: 2;
+        pointer-events: auto;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 1rem 1.25rem;
+        flex: 1;
+        min-width: min(100%, 18rem);
+        padding: 0.85rem 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+      }
+      .controls fieldset {
+        margin: 0;
+        padding: 0;
+        border: none;
+      }
+      .controls legend {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin-bottom: 0.35rem;
+      }
+      .controls label.opt {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-right: 0.85rem;
+        font-size: 0.88rem;
+        cursor: pointer;
+      }
+      .control-bar button {
+        font: inherit;
+        padding: 0.45rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--accent);
+        background: rgba(77, 163, 255, 0.15);
+        color: var(--accent);
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .control-bar button:hover:not(:disabled) {
+        background: rgba(77, 163, 255, 0.28);
+      }
+      .control-bar button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .control-bar button.primary {
+        background: var(--accent);
+        color: #0a1628;
+      }
+      .control-bar button.primary:hover:not(:disabled) {
+        filter: brightness(1.08);
+      }
+      #btnNext {
+        border-color: var(--ok);
+        color: var(--ok);
+        background: rgba(62, 207, 142, 0.12);
+      }
+      #btnNext:not(:disabled) {
+        animation: glow 1.5s ease infinite;
+      }
+      @keyframes glow {
+        50% {
+          box-shadow: 0 0 0 2px rgba(62, 207, 142, 0.25);
+        }
+      }
+      .hint {
+        font-size: 0.8rem;
+        color: var(--muted);
+        width: 100%;
+        flex-basis: 100%;
+        margin: 0;
+      }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--muted);
+      }
+      .dot.run {
+        background: var(--accent);
+        animation: pulse 1.2s ease infinite;
+      }
+      .dot.ok {
+        background: var(--ok);
+      }
+      .dot.err {
+        background: var(--bad);
+      }
+      @keyframes pulse {
+        50% {
+          opacity: 0.4;
+        }
+      }
+      #timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem 1.1rem;
+        background: var(--panel);
+      }
+      .card.banner {
+        border-left: 4px solid var(--accent);
+      }
+      .card.note {
+        border-left: 4px solid var(--muted);
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .card.note strong {
+        color: var(--text);
+      }
+      .card.tally h3 {
+        margin: 0 0 0.75rem;
+        font-size: 0.95rem;
+        color: var(--accent);
+      }
+      .bars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.88rem;
+      }
+      .bar-name {
+        width: 5rem;
+        flex-shrink: 0;
+      }
+      .bar-track {
+        flex: 1;
+        height: 22px;
+        background: #0d1117;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2b6cb0, var(--accent));
+        border-radius: 4px;
+        min-width: 4px;
+        transition: width 0.4s ease;
+      }
+      .bar-count {
+        width: 2rem;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      pre.raw {
+        margin: 0;
+        padding: 0.75rem;
+        background: #0d1117;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        overflow-x: auto;
+        color: #a8c5e0;
+      }
+      .expected {
+        border-left: 4px solid var(--warn);
+        font-size: 0.85rem;
+      }
+      .expected code {
+        display: block;
+        margin-top: 0.5rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: #f0c14b;
+      }
+      .done-ok {
+        border: 1px solid var(--ok);
+        color: var(--ok);
+      }
+      .done-bad {
+        border: 1px solid var(--bad);
+        color: var(--bad);
+      }
+      .busy {
+        color: var(--warn);
+      }
+      .advance-card {
+        border-left: 4px solid var(--ok);
+        background: rgba(62, 207, 142, 0.06);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>holochain-ballot — live DNA demo</h1>
+      <p>
+        Same machinery as <code style="color: var(--accent)">npm run docker:test</code>, with a visual timeline.
+        The run creates a <strong>draft</strong> election, then the creator calls
+        <code style="color: var(--accent)">advance_election_phase</code> before registration and again before voting
+        (see <code style="color: var(--accent)">docs/ELECTION_LIFECYCLE.md</code>). Four players default to
+        <strong>Alex, Blake, Casey, Dana</strong> (same names as the Vite showcase lab). The right column is a raw-style
+        log of what Tryorama is doing.
+      </p>
+      <p style="margin-top: 0.65rem; font-size: 0.82rem; color: var(--muted); max-width: 52rem">
+        <strong>Not</strong> for government or certified public elections—developer education and pilot-style demos only.
+        See <code style="color: var(--accent)">docs/SCOPE.md</code> in the repo.
+      </p>
+    </header>
+    <div class="layout">
+      <div class="timeline-col">
+        <div class="control-bar">
+          <div id="controls" class="controls">
+            <fieldset>
+              <legend>Players</legend>
+              <label class="opt"
+                ><input type="radio" name="players" value="4" checked /> 4 (showcase names)</label
+              >
+              <label class="opt"><input type="radio" name="players" value="2" /> 2 (Alice &amp; Bob)</label>
+            </fieldset>
+            <fieldset>
+              <legend>Pace</legend>
+              <label class="opt"><input type="radio" name="step" value="auto" checked /> Auto (real time)</label>
+              <label class="opt"><input type="radio" name="step" value="manual" /> Click each step</label>
+            </fieldset>
+            <p class="hint" id="controlHint">
+              Choose options, then <strong>Start demo</strong>. Manual: use <strong>Next step</strong> after each pause
+              (including once before conductors boot).
+            </p>
+          </div>
+          <div class="demo-actions">
+            <button type="button" class="primary" id="btnStart">Start demo</button>
+            <button type="button" id="btnNext" disabled>Next step</button>
+          </div>
+        </div>
+        <div id="status" class="status">
+          <span class="dot" id="dot"></span>
+          <span id="statusText">Ready — configure and start</span>
+        </div>
+        <div id="timeline"></div>
+      </div>
+      <aside class="terminal-col">
+        <div class="terminal-head">Behind the scenes (terminal)</div>
+        <pre id="terminalOut"><span class="dim"># Log lines mirror server-side Tryorama hooks (banners, zome notes, tallies).</span></pre>
+      </aside>
+    </div>
+    <script>
+      const timeline = document.getElementById("timeline");
+      const dot = document.getElementById("dot");
+      const statusText = document.getElementById("statusText");
+      const terminalOut = document.getElementById("terminalOut");
+      const btnStart = document.getElementById("btnStart");
+      const btnNext = document.getElementById("btnNext");
+      const controlHint = document.getElementById("controlHint");
+      const controlsEl = document.getElementById("controls");
+
+      let es = null;
+
+      function setStatus(text, cls) {
+        statusText.textContent = text;
+        dot.className = "dot" + (cls ? " " + cls : "");
+      }
+
+      function appendTerminal(line) {
+        const span = document.createElement("span");
+        span.textContent = line + "\n";
+        terminalOut.appendChild(span);
+        terminalOut.scrollTop = terminalOut.scrollHeight;
+      }
+
+      function addCard(html, className) {
+        const el = document.createElement("div");
+        el.className = "card " + (className || "");
+        el.innerHTML = html;
+        timeline.appendChild(el);
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function maxCount(counts) {
+        const m = Math.max(1, ...counts);
+        return m;
+      }
+
+      function renderTally(label, plain) {
+        const opts = plain.options || [];
+        const counts = plain.counts || [];
+        const hi = maxCount(counts);
+        const bars = opts
+          .map((name, i) => {
+            const c = counts[i] ?? 0;
+            const pct = (c / hi) * 100;
+            return `<div class="bar-row"><span class="bar-name">${escapeHtml(name)}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><span class="bar-count">${c}</span></div>`;
+          })
+          .join("");
+        return `<h3>${escapeHtml(label)}</h3><div class="bars">${bars}</div><pre class="raw">${escapeHtml(JSON.stringify(plain, null, 2))}</pre>`;
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function queryMode() {
+        const players = document.querySelector('input[name="players"]:checked')?.value || "4";
+        const step = document.querySelector('input[name="step"]:checked')?.value || "auto";
+        return { players, step };
+      }
+
+      function lockControls() {
+        btnStart.disabled = true;
+        controlsEl.querySelectorAll('input[type="radio"]').forEach((el) => {
+          el.disabled = true;
+        });
+        controlHint.textContent =
+          "Demo running. Refresh the page after it finishes to run again. Manual mode: use Next step when highlighted.";
+      }
+
+      async function postAdvance() {
+        btnNext.disabled = true;
+        const advUrl = new URL("/advance", window.location.origin).href;
+        try {
+          let r = await fetch(advUrl, { method: "POST", cache: "no-store" });
+          if (!r.ok) {
+            r = await fetch(advUrl, { method: "GET", cache: "no-store" });
+          }
+          if (!r.ok) {
+            setStatus(`Advance failed (${r.status}) — try again`, "err");
+            btnNext.disabled = false;
+          }
+        } catch {
+          try {
+            const r2 = await fetch(advUrl, { method: "GET", cache: "no-store" });
+            if (!r2.ok) throw new Error(String(r2.status));
+          } catch {
+            setStatus("Network error on advance", "err");
+            btnNext.disabled = false;
+          }
+        }
+      }
+
+      btnNext.addEventListener("click", () => postAdvance());
+
+      btnStart.addEventListener("click", () => {
+        if (es) return;
+        timeline.innerHTML = "";
+        terminalOut.innerHTML = "";
+        appendTerminal("# session starting…");
+        lockControls();
+        const { players, step } = queryMode();
+        const manual = step === "manual";
+        btnNext.style.display = manual ? "" : "none";
+        btnNext.disabled = true;
+
+        setStatus(manual ? "Waiting for your first step…" : "Demo running…", "run");
+        // Path encodes mode + players so proxies cannot strip query strings from EventSource.
+        const streamUrl = `${window.location.origin}/events/${step}/${players}`;
+        es = new EventSource(streamUrl);
+
+        es.onopen = () => appendTerminal("# SSE stream connected");
+
+        es.addEventListener("intro", (e) => {
+          const d = JSON.parse(e.data);
+          appendTerminal(
+            `# holochain-ballot (${d.playerCount} players, ${d.manualStep ? "manual steps" : "auto"})`,
+          );
+          appendTerminal(`[intro] ${d.title}`);
+          appendTerminal(`  ${d.body}`);
+          setStatus(
+            manual ? "Manual mode — use Next step" : "Demo running — conductors online",
+            "run",
+          );
+          addCard(
+            `<strong>${escapeHtml(d.title)}</strong><p style="margin:0.5rem 0 0;color:var(--muted)">${escapeHtml(d.body)}</p>`,
+            "note",
+          );
+        });
+
+        es.addEventListener("await_advance", (e) => {
+          const d = JSON.parse(e.data);
+          appendTerminal(`[pause] ${d.message || "Continue when ready."}`);
+          btnNext.disabled = false;
+          addCard(
+            `<strong>Paused</strong><p style="margin:0.35rem 0 0">${escapeHtml(d.message || "Continue when ready.")}</p>`,
+            "advance-card",
+          );
+        });
+
+        es.addEventListener("banner", (e) => {
+          const d = JSON.parse(e.data);
+          appendTerminal(`[step] ${d.title}`);
+          if (manual) btnNext.disabled = true;
+          addCard(escapeHtml(d.title), "banner");
+        });
+
+        es.addEventListener("note", (e) => {
+          const d = JSON.parse(e.data);
+          appendTerminal(`  → ${d.msg}`);
+          addCard(`→ ${escapeHtml(d.msg)}`, "note");
+        });
+
+        es.addEventListener("terminal", (e) => {
+          const d = JSON.parse(e.data);
+          if (d.line != null) appendTerminal(d.line);
+        });
+
+        es.addEventListener("tally", (e) => {
+          const d = JSON.parse(e.data);
+          appendTerminal(`[tally] ${d.label}`);
+          const raw = JSON.stringify(d.plain, null, 2);
+          appendTerminal(raw.split("\n").slice(0, 10).join("\n") + (raw.length > 600 ? "\n  …" : ""));
+          addCard(renderTally(d.label, d.plain), "tally");
+        });
+
+        es.addEventListener("expected_error", (e) => {
+          const d = JSON.parse(e.data);
+          appendTerminal(`[expected error] ${d.preview}`);
+          addCard(
+            `<strong>Expected rejection</strong> (one vote per agent)<code>${escapeHtml(d.preview)}</code>`,
+            "expected",
+          );
+        });
+
+        es.addEventListener("done", (e) => {
+          const d = JSON.parse(e.data);
+          appendTerminal(d.ok ? "# done — OK" : `# done — FAIL: ${d.failReason || ""}`);
+          es.close();
+          es = null;
+          btnNext.style.display = "none";
+          if (d.ok) {
+            setStatus("Finished — conductors shut down", "ok");
+            addCard("<strong>Demo complete.</strong> Conductors closed when the run finished.", "done-ok");
+          } else {
+            setStatus("Finished with failure", "err");
+            addCard("<strong>Demo failed.</strong> " + escapeHtml(d.failReason || "unknown"), "done-bad");
+          }
+        });
+
+        es.addEventListener("fatal", (e) => {
+          const d = JSON.parse(e.data);
+          appendTerminal(`# fatal: ${d.message}`);
+          es.close();
+          es = null;
+          btnNext.style.display = "none";
+          setStatus("Error", "err");
+          addCard("<strong>Fatal</strong><pre class=\"raw\">" + escapeHtml(d.message) + "</pre>", "done-bad");
+        });
+
+        es.addEventListener("busy", (e) => {
+          es.close();
+          es = null;
+          setStatus("Busy", "err");
+          addCard(
+            "<p class=\"busy\">Another demo is already running in this container. Wait for it to finish, then refresh.</p>",
+            "note",
+          );
+        });
+
+        es.onerror = () => {
+          if (es && es.readyState === EventSource.CLOSED) return;
+          setStatus("Connection lost — refresh the page", "err");
+        };
+      });
+    </script>
+  </body>
+</html>

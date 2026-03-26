@@ -1,0 +1,13 @@
+[package]
+name = "voting_integrity"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "voting_integrity"
+
+[dependencies]
+serde = "1"
+hdi = "=0.7.1-rc.2"
+holochain_serialized_bytes = "=0.0.56"

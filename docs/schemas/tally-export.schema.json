@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/holochain-ballot/tally-export.schema.json",
+  "title": "holochain-ballot tally export",
+  "type": "object",
+  "required": [
+    "holochain_ballot_tally_export",
+    "election_create_action",
+    "title",
+    "options",
+    "counts",
+    "vote_action_hashes"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "holochain_ballot_tally_export": {
+      "type": "string",
+      "description": "Wrapper format version (e.g. 1.0)."
+    },
+    "election_create_action": {
+      "description": "ActionHash of the election create action (encoding as produced by your tooling)."
+    },
+    "fetched_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional ISO-8601 time when the tally was read."
+    },
+    "title": { "type": "string" },
+    "options": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 2
+    },
+    "counts": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "description": "counts[i] = votes for options[i]"
+    },
+    "vote_action_hashes": {
+      "type": "array",
+      "description": "Sorted list of vote create ActionHashes, same ordering rule as get_tally.",
+      "items": {}
+    }
+  }
+}
