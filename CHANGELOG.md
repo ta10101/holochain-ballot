@@ -8,6 +8,7 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Added
 
+- Sister-project bridge to **private** [holochain-ballot-e2e](https://github.com/ta10101/holochain-ballot-e2e): [docs/holochain-ballot-e2e-plan.md](docs/holochain-ballot-e2e-plan.md), [docs/holochain-ballot-e2e-roadmap.md](docs/holochain-ballot-e2e-roadmap.md); README and [ROADMAP.md](docs/ROADMAP.md) cross-links.
 - P3 operator docs:
   - `docs/OPERATIONS.md`
   - `docs/VERSIONING.md`

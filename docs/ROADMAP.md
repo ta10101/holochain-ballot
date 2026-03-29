@@ -79,6 +79,8 @@ This is the **working plan** for the repo. Work is ordered **P0 → P5**. Check 
 - [x] **P5.2** — **Explicit go/no-go** in `docs/SCOPE.md` before any implementation.
 - [x] **P5.3** — **N/A under current NO-GO** ([SCOPE.md](SCOPE.md)). *If* scope is ever revised to **GO**, then: new DNA version or fork; threat model + external review plan—**not** a silent patch to transparent tally.
 
+**Sister repo (Program 2, private):** **[holochain-ballot-e2e](https://github.com/ta10101/holochain-ballot-e2e)** — [roadmap](https://github.com/ta10101/holochain-ballot-e2e/blob/master/docs/ROADMAP.md). Bridge: [holochain-ballot-e2e-plan.md](holochain-ballot-e2e-plan.md), [holochain-ballot-e2e-roadmap.md](holochain-ballot-e2e-roadmap.md).
+
 ---
 
 ## How we use this file

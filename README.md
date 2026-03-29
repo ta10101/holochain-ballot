@@ -18,6 +18,8 @@ Lightweight voting hApp: elections, voter registration, ballots, and tallies on 
 
 **Secret ballot / P5:** [docs/SECRET_BALLOT_RESEARCH.md](docs/SECRET_BALLOT_RESEARCH.md) (P5.1 research). **Go/no-go (P5.2):** [docs/SCOPE.md](docs/SCOPE.md#secret-ballot--high-stakes-track--go-no-go-p52) — current decision **NO-GO** for secret-ballot DNA in this repo until criteria there are met.
 
+**Sister project (E2E, private GitHub):** **[holochain-ballot-e2e](https://github.com/ta10101/holochain-ballot-e2e)** — secret ballot + end-to-end verifiable design ([roadmap](https://github.com/ta10101/holochain-ballot-e2e/blob/master/docs/ROADMAP.md), access required). Bridge: [docs/holochain-ballot-e2e-plan.md](docs/holochain-ballot-e2e-plan.md).
+
 **Share / awareness:** [docs/LAUNCH_KIT.md](docs/LAUNCH_KIT.md) (copy-paste posts, 30-second pitch, first-week checklist).
 
 ## Prerequisites
